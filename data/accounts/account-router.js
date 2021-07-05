@@ -1,28 +1,19 @@
 const express = require("express");
 const knex = require("knex");
 
-const db = require("./data/dbConfig.js");
-// const AccountRouter = require("./data/accounts/account-router.js");
-
-const server = express();
-
-server.use(express.json());
-
-// server.use("/api/accounts", AccountRouter);
-
-server.get("/", (req, res) => {
-  res.send(`<h2>Givin' it a go</h2>`);
-});
+const db = require("../dbConfig");
 
 const dbConnection = knex({
   client: "sqlite3",
   connection: {
-    filename: "./data/seeds/budget.db3"
+    filename: "../seeds/budget.db3"
   },
   useNullAsDefault: true
 });
 
-server.get("/", (req, res) => {
+const router = express.Router();
+
+router.get("/", (req, res) => {
   dbConnection("accounts")
     .then(accounts => {
       res.status(200).json(accounts);
@@ -32,7 +23,7 @@ server.get("/", (req, res) => {
     });
 });
 
-server.get("/:id", (req, res) => {
+router.get("/:id", (req, res) => {
   dbConnection("accounts")
     .where({ id: req.params.id })
     .first()
@@ -46,7 +37,7 @@ server.get("/:id", (req, res) => {
     .catch(error => res.status(500).json(error));
 });
 
-server.post("/", (req, res) => {
+router.post("/", (req, res) => {
   const accounts = req.body;
   dbConnection("accounts")
     .insert(accounts, "id")
@@ -57,7 +48,7 @@ server.post("/", (req, res) => {
     .catch(error => res.status(500).json(error));
 });
 
-server.put("/:id", (req, res) => {
+router.put("/:id", (req, res) => {
   dbConnection("accounts")
     .where({ id: req.params.id })
     .update(req.body)
@@ -71,7 +62,7 @@ server.put("/:id", (req, res) => {
     .catch(error => res.status(500).json(error));
 });
 
-server.delete("/:id", (req, res) => {
+router.delete("/:id", (req, res) => {
   dbConnection("accounts")
     .where({ id: req.params.id })
     .del()
@@ -81,4 +72,4 @@ server.delete("/:id", (req, res) => {
     .catch(error => res.status(500).json(error));
 });
 
-module.exports = server;
+module.exports = router;
